@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'; 
+import { type } from 'os';
 import passportLocalMongoose from 'passport-local-mongoose'
 
 
@@ -18,6 +19,10 @@ const UserSchema = new Schema({
     type: String,
     required: true
   },
+  authType: {
+    type: String,
+    required: true
+  }
 })
 
 UserSchema.plugin(passportLocalMongoose,{ usernameField: "email" })

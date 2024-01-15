@@ -6,6 +6,9 @@ import mongoose from "mongoose"
 import MongoStore from "connect-mongo";
 import session from "express-session";
 import { AuthRouter } from "./routes/auth.js";
+import { CustomerRouter } from "./routes/customer.js";
+import { AdminRouter } from "./routes/admin.js";
+
 
 const LocalStrategy = passportLocal.Strategy
 const port = 3000
@@ -36,6 +39,8 @@ app.use(session({
 }))
 
 app.use("/auth",AuthRouter)
+app.use("/customer",CustomerRouter)
+app.use("/admin",AdminRouter)
 
 app.get('/dashboard', (req, res, next) => {
   res.send('Dashboard Login');

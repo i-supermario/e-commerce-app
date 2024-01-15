@@ -4,9 +4,12 @@ import passport from "passport";
 import passportLocal from "passport-local"
 import { UserModel } from "../models/user.js";
 import passportGoogleStrategy from "passport-google-oauth2"
+
 const LocalStrategy = passportLocal.Strategy
 configDotenv()
 const router = express.Router()
+
+router.get("/",(req,res)=> res.send("Working Auth"))
 
 // LOCAL STRATTEGY
 
@@ -19,14 +22,13 @@ passport.deserializeUser(UserModel.deserializeUser())
 router.use(passport.initialize())
 router.use(passport.session())
 
-router.get("/",(req,res)=> res.send("Working Auth"))
-
 router.post("/register", (req,res) => {
     UserModel.register(
         new UserModel({ 
           email: req.body.email,
           name: req.body.name,
-          type: req.body.type
+          type: req.body.type,
+          authType: "local"
         }), req.body.password, function (err, msg) {
           if (err) {
             res.send(err);
@@ -37,15 +39,24 @@ router.post("/register", (req,res) => {
       )
 })
 
-// username field is required in body for passport authentication 
-router.post('/login', passport.authenticate('local', { 
-    failureRedirect: '/login-failure', 
-  }), 
-  (req, res, next) => {
 
+router.post('/login', 
+(req,res,next) => {
+  if(req.body.authType=="local") next()
+  else res.redirect("/auth/google/login")
+},
+passport.authenticate('local', { 
+  failureRedirect: '/login-failure', 
+}), 
+(req, res, next) => {
+    console.log("logged in")
     const userType = req.body.type
-    if(userType=="ADMIN") res.redirect("/admin")
-    else res.redirect("/dashboard")
+    if(userType=="ADMIN"){
+      res.redirect("/admin/dashboard")
+    }
+    else {
+      res.redirect("/customer/dashboard")
+    }
 });
 
 // GOOGLE OAUTH STRATEGY
@@ -66,7 +77,8 @@ passport.use(new googleAuthStrategy({
       UserModel.create({
         name: profile.displayName,
         email: profile.emails?.[0].value,
-        type: "CUSTOMER"
+        type: "CUSTOMER",
+        authType: "google"
       })
       .then((newUser) => done(null, newUser))
     }
@@ -87,17 +99,18 @@ router.get('/google/redirect',
     failureMessage: true 
   }
 ))
+
+// OTHER
   
 router.get('/login-failure', (req, res, next) => {
     res.send('Login Attempt Failed.');
 });
 
-const isAuthenticated = (req,res,next) => {
-    if(req.isAuthenticated()){
-        return next()
-    }
+export const isAuthenticated = (req,res,next) => {
+  if(req.isAuthenticated()){
+      return next()
+  }
 }
 
-router.get("/protected", isAuthenticated, (req, res) => res.send({"message": "dashboard"}))
 
 export const AuthRouter = router
