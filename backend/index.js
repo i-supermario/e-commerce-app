@@ -1,4 +1,5 @@
 import express from "express";
+import cors from "cors"
 import { configDotenv } from "dotenv";
 import passport, { Passport } from "passport";
 import passportLocal from "passport-local"
@@ -21,6 +22,7 @@ mongoose.connect(process.env.MONGODB_URL,{dbName:"ecommerce"})
 const app = express()
 
 app.use(express.urlencoded({extended:false}))
+app.use(cors())
 
 const storeOptions = { 
     mongoUrl : process.env.MONGODB_URL,

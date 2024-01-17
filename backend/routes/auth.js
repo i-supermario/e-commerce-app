@@ -42,6 +42,8 @@ router.post("/register", (req,res) => {
 
 router.post('/login', 
 (req,res,next) => {
+  console.log("login")
+  console.log(req)
   if(req.body.authType=="local") next()
   else res.redirect("/auth/google/login")
 },

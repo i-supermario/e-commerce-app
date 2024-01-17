@@ -1,6 +1,5 @@
 import express from "express"
 import { UserModel } from "../models/user.js"
-import { isAuthenticated } from "../middleware/utils.js"
 
 const router = express.Router()
 
@@ -13,7 +12,7 @@ router.get("/get/:email",(req,res) => {
     .catch(e => res.status(400).send({e}))
 })
 
-router.get("/dashboard", isAuthenticated, (req,res) => {
+router.get("/dashboard", (req,res) => {
     console.log("customer dashboard")
     res.send("Customer dashboard")
 })
